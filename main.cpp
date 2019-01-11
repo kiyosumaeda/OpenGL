@@ -2,8 +2,10 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <memory>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "Shape.h"
 
 //シェーダオブジェクトのコンパイル結果を表示する
 //shader: シェーダオブジェクト名
@@ -146,6 +148,14 @@ GLuint loadProgram(const char *vert, const char *frag) {
     return vstat && fstat ? createProgram(vsrc.data(), fsrc.data()) : 0;
 }
 
+constexpr Object::Vertex rectangleVertex[] =
+{
+    {-0.5f, -0.5f},
+    {0.5f, -0.5f},
+    {0.5f, 0.5f},
+    {-0.5f, 0.5f}
+};
+
 int main() {
     //GLFWを初期化する
     if (glfwInit() == GL_FALSE) {
@@ -191,6 +201,9 @@ int main() {
     //プログラムオブジェクトを作成する
     const GLuint program(loadProgram("point.vert", "point.frag"));
     
+    //図形データを作成する
+    std::unique_ptr<const Shape> shape(new Shape(2, 4, rectangleVertex));
+    
     while(glfwWindowShouldClose(window) == GL_FALSE) {
         //ウィンドウを消去する
         glClear(GL_COLOR_BUFFER_BIT);
@@ -198,9 +211,8 @@ int main() {
         //シェーダプログラムの使用開始
         glUseProgram(program);
         
-        //
-        //ここで描画処理を行う
-        //
+        //図形を描画する
+        shape->draw();
         
         //カラーバッファを入れ替える
         glfwSwapBuffers(window);
